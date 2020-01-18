@@ -1,0 +1,12 @@
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.csprojAssemblyReference.cache
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.QBTest.resources
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.Properties.Resources.resources
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.csproj.GenerateResource.cache
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.csproj.CoreCompileInputs.cache
+D:\EST\QBTest\QBTest\bin\Debug\QBTest.exe.config
+D:\EST\QBTest\QBTest\bin\Debug\QBTest.exe
+D:\EST\QBTest\QBTest\bin\Debug\QBTest.pdb
+D:\EST\QBTest\QBTest\obj\Debug\Interop.QBXMLRP2Lib.dll
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.csproj.ResolveComReference.cache
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.exe
+D:\EST\QBTest\QBTest\obj\Debug\QBTest.pdb
