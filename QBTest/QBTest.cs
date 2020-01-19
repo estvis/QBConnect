@@ -42,6 +42,7 @@ namespace QBTest
             comboBox_Customer.Items.AddRange(cusomers);
             showStatus("Loading items...");
             string[] items = await qb.loadItems();
+            items = ChectList(items);
             comboBox_Item1.Items.AddRange(items);
             comboBox_Item2.Items.AddRange(items);
             comboBox_Item3.Items.AddRange(items);
@@ -61,7 +62,21 @@ namespace QBTest
 
             showStatus("Ready");
         }
-
+        private string[] ChectList(string[] strings)
+        {
+            List<string> r = new List<string>();
+            string[] res = new string[0];
+            foreach(string s in strings)
+            {
+                if (!String.IsNullOrEmpty(s)) r.Add(s);
+            }
+            res = new string[r.Count];
+            for(int i = 0; i < r.Count; i++)
+            {
+                res[i] = r[i];
+            }
+            return res;
+        }
         private void showStatus(string text)
         {
             labelLoadStatus.Visible = true;

@@ -1,4 +1,3 @@
-D:\EST\QBTest\QBTest\obj\Debug\QBTest.csprojAssemblyReference.cache
 D:\EST\QBTest\QBTest\obj\Debug\QBTest.QBTest.resources
 D:\EST\QBTest\QBTest\obj\Debug\QBTest.Properties.Resources.resources
 D:\EST\QBTest\QBTest\obj\Debug\QBTest.csproj.GenerateResource.cache

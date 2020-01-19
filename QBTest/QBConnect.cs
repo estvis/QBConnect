@@ -25,7 +25,7 @@ namespace QBTest
         private string maxVersion;
         private string companyFile = "";
         private QBFileMode mode = QBFileMode.qbFileOpenDoNotCare;
-        public Dictionary<DateTime,Exception> ErrorList = new Dictionary<DateTime, Exception>();
+        public ErrorInfoData ErrorList = new ErrorInfoData();
         public string appID = "EST13";
         public string appName = "EstVis";
 
@@ -110,7 +110,7 @@ namespace QBTest
             }
             catch (Exception ex)
             {
-                ErrorList.Add(DateTime.Now, ex);
+                ErrorList.Add(DateTime.Now.AddMilliseconds(1), ex);
             }
             disconnectFromQB();
 
@@ -344,7 +344,7 @@ namespace QBTest
                         more = nav.MoveToFirstChild();
                         continue;
                     case "FullName":
-                        retVal[x] = nav.Value.Trim();
+                        retVal[x] = nav.Value.Trim().Length>0? nav.Value.Trim():"No name";
                         x++;
                         more = nav.MoveToParent();
                         more = nav.MoveToNext();
@@ -973,6 +973,17 @@ namespace QBTest
             string day = dt.Day.ToString();
             if (day.Length < 2) day = "0" + day;
             InvDate = year + "-" + month + "-" + day;            
+        }
+    }
+
+    public class ErrorInfoData
+    {
+        public List<Dictionary<DateTime,Exception>> ErrorList = new List<Dictionary<DateTime, Exception>>();
+        public void Add(DateTime dt,Exception ex)
+        {
+            Dictionary<DateTime, Exception> it = new Dictionary<DateTime, Exception>();
+            it.Add(dt, ex);
+            ErrorList.Add(it);
         }
     }
 }
