@@ -14,7 +14,7 @@ namespace QBTest
          Author: Timur Nizamov
          Versio: 1.0.0.1
          req:[
-         COM dll: QBXMLRP2Lib (https://static.developer.intuit.com/resources/qbsdk130.exe)
+         COM dll: QBXMLRP2Lib (https://static.developer.intuit.com/resources/qbdsdk130.exe)
             ]
         */
         string workCurrency = "";
@@ -404,6 +404,30 @@ namespace QBTest
             }
             return retVal;
         }
+        private string[] parseCustomerAddRs(string xml)
+        {
+            string[] retVal = new string[3];
+            try
+            {
+                XmlNodeList RsNodeList = null;
+                XmlDocument Doc = new XmlDocument();
+                Doc.LoadXml(xml);
+                RsNodeList = Doc.GetElementsByTagName("CustomerAddRs");
+                XmlAttributeCollection rsAttributes = RsNodeList.Item(0).Attributes;
+                XmlNode statusCode = rsAttributes.GetNamedItem("statusCode");
+                retVal[0] = Convert.ToString(statusCode.Value);
+                XmlNode statusSeverity = rsAttributes.GetNamedItem("statusSeverity");
+                retVal[1] = Convert.ToString(statusSeverity.Value);
+                XmlNode statusMessage = rsAttributes.GetNamedItem("statusMessage");
+                retVal[2] = Convert.ToString(statusMessage.Value);
+            }
+            catch (Exception e)
+            {
+                ErrorList.Add(DateTime.Now, e);
+                retVal = null;
+            }
+            return retVal;
+        }
         private string[] parseSalesTaxCodeQueryRs(string xml, int count)
         {
             /*
@@ -583,7 +607,6 @@ namespace QBTest
                 return null;
             }
         }
-
         #region QueryBlders
         private string buildCustomerQueryRqXML(string[] includeRetElement, string fullName)
         {
@@ -819,6 +842,34 @@ namespace QBTest
 
             return requestXML;
         }
+
+        private string buildCustomerAddRqXML(QBCustomerInfo cst)
+        {
+            //step2: create the qbXML request
+            XmlDocument inputXMLDoc = new XmlDocument();
+            inputXMLDoc.AppendChild(inputXMLDoc.CreateXmlDeclaration("1.0", null, null));
+            inputXMLDoc.AppendChild(inputXMLDoc.CreateProcessingInstruction("qbxml", "version=\"2.0\""));
+            XmlElement qbXML = inputXMLDoc.CreateElement("QBXML");
+            inputXMLDoc.AppendChild(qbXML);
+            XmlElement qbXMLMsgsRq = inputXMLDoc.CreateElement("QBXMLMsgsRq");
+            qbXML.AppendChild(qbXMLMsgsRq);
+            qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
+            XmlElement custAddRq = inputXMLDoc.CreateElement("CustomerAddRq");
+            qbXMLMsgsRq.AppendChild(custAddRq);
+            custAddRq.SetAttribute("requestID", "1");
+            XmlElement custAdd = inputXMLDoc.CreateElement("CustomerAdd");
+            custAddRq.AppendChild(custAdd);
+            custAdd.AppendChild(inputXMLDoc.CreateElement("Name")).InnerText = cst.Name;
+            custAdd.AppendChild(inputXMLDoc.CreateElement("FirstName")).InnerText = cst.FirstName;
+            custAdd.AppendChild(inputXMLDoc.CreateElement("LastName")).InnerText = cst.LastName;
+            if (cst.Phone.Length > 0)
+            {
+                custAdd.AppendChild(inputXMLDoc.CreateElement("Phone")).InnerText = cst.Phone;
+            }
+
+            string input = inputXMLDoc.OuterXml;
+            return input;
+        }
         #endregion
 
         public double getDueInDays(string val)
@@ -921,6 +972,39 @@ namespace QBTest
             //MessageBox.Show(msg);
             return msg;
         }
+
+        public async Task<string> AddCustomer(QBCustomerInfo cst)
+        {
+            string msg = "";
+            string requestXML = buildCustomerAddRqXML(cst);
+            if (requestXML == null)
+            {
+                msg = "One of the input is missing. Double-check your entries and then click Save again. Error saving invoice";
+                return msg;
+            }
+            await connectToQB();
+            string response = await processRequestFromQB(requestXML);
+            disconnectFromQB();
+            string[] status = new string[3];
+            if (response != null) status = parseCustomerAddRs(response);
+
+
+            if (response != null & status[0] == "0")
+            {
+                msg = "Customer was added successfully!";
+            }
+            else
+            {
+                msg = "Could not add customer.";
+            }
+
+            msg = msg + "\n\n";
+            msg = msg + "Status Code = " + status[0] + "\n";
+            msg = msg + "Status Severity = " + status[1] + "\n";
+            msg = msg + "Status Message = " + status[2] + "\n";
+            //MessageBox.Show(msg);
+            return msg;
+        }
         #endregion
 
     }
@@ -974,6 +1058,13 @@ namespace QBTest
             if (day.Length < 2) day = "0" + day;
             InvDate = year + "-" + month + "-" + day;            
         }
+    }
+    public abstract class QBCustomerInfo
+    {
+        public string Name;
+        public string Phone;
+        public string FirstName;
+        public string LastName;
     }
 
     public class ErrorInfoData
