@@ -97,6 +97,25 @@ namespace QBTest
 
             return customerList;
         }
+        public async Task<List<QBCustomerInfo>> loadCustomersList()
+        {
+            List<QBCustomerInfo> customerList = new List<QBCustomerInfo>;
+            string request = "CustomerQueryRq";
+            await connectToQB();
+            try
+            {
+                int count = await getCount(request);
+                string response = await processRequestFromQB(buildCustomerQueryRqXML(new string[] { "FullName", "Phone", "BillAddress", "FirstName", "LastName" }, null));
+                customerList = parseCustomerListQueryRs(response, count);
+            }
+            catch (Exception ex)
+            {
+                ErrorList.Add(DateTime.Now, ex);
+            }
+            disconnectFromQB();
+
+            return customerList;
+        }
         public async Task<string[]> loadItems()
         {
             string[] itemList = new string[0];
@@ -249,6 +268,97 @@ namespace QBTest
             }
             return retVal;
         }
+        private List<QBCustomerInfo> parseCustomerListQueryRs(string xml, int count)
+        {
+            /*
+             <?xml version="1.0" ?> 
+             <QBXML>
+             <QBXMLMsgsRs>
+             <CustomerQueryRs requestID="1" statusCode="0" statusSeverity="Info" statusMessage="Status OK">
+                 <CustomerRet>
+                     <FullName>Abercrombie, Kristy</FullName> 
+                 </CustomerRet>
+             </CustomerQueryRs>
+             </QBXMLMsgsRs>
+             </QBXML>    
+            */
+            List<QBCustomerInfo> res = new List<QBCustomerInfo>();
+            string[] retVal = new string[count];
+            System.IO.StringReader rdr = new System.IO.StringReader(xml);
+            System.Xml.XPath.XPathDocument doc = new System.Xml.XPath.XPathDocument(rdr);
+            System.Xml.XPath.XPathNavigator nav = doc.CreateNavigator();
+
+            if (nav != null)
+            {
+                nav.MoveToFirstChild();
+            }
+            bool more = true;            
+            QBCustTmp tmp =new QBCustTmp();
+            while (more)
+            {               
+                switch (nav.LocalName)
+                {
+                    case "QBXML":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "QBXMLMsgsRs":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "CustomerQueryRs":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "CustomerRet":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "FirstName":
+                        tmp.FirstName = nav.Value.Trim();
+                        more = nav.MoveToNext();
+                        continue;
+                    case "LastName":
+                        tmp.LastName= nav.Value.Trim();
+                        more = nav.MoveToNext();
+                        continue;
+                    case "Phone":
+                        tmp.Phone= nav.Value.Trim();
+                        res.Add(tmp);
+                        tmp = new QBCustTmp();
+                        more = nav.MoveToParent();
+                        more = nav.MoveToNext();
+                        continue;
+                    case "FullName":                        
+                        tmp.Name = nav.Value.Trim();
+                        more = nav.MoveToNext();
+                        continue;
+                    case "BillAddress":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "ShipAddress":
+                    case "CurrencyRef":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "Addr1":
+                        tmp.BiilAddr= nav.Value.Trim();
+                        more = nav.MoveToParent();
+                        more = nav.MoveToNext();
+                        continue;
+                    case "Addr2":
+                    case "Addr3":
+                    case "Addr4":
+                    case "Addr5":
+                    case "City":
+                    case "State":
+                    case "PostalCode":
+                        retVal[x] = retVal[x] + "\r\n" + nav.Value.Trim();
+                        more = nav.MoveToNext();
+                        continue;
+                    default:
+                        more = nav.MoveToNext();
+                        continue;
+                }
+            }
+            return res;
+        }
+
         public virtual int parseRsForCount(string xml, string request)
         {
             int ret = -1;
@@ -380,6 +490,7 @@ namespace QBTest
             }
             return retVal;
         }
+
         private string[] parseInvoiceAddRs(string xml)
         {
             string[] retVal = new string[3];
@@ -923,7 +1034,6 @@ namespace QBTest
             return returnVal;
 
         }
-
         public decimal ParseDecimal(object val)
         {
             decimal res = 0m;
@@ -1065,8 +1175,16 @@ namespace QBTest
         public string Phone;
         public string FirstName;
         public string LastName;
-    }
+        public string BiilAddr;
 
+        protected QBCustomerInfo()
+        {
+        }
+    }
+    public class QBCustTmp : QBCustomerInfo
+    {
+
+    }
     public class ErrorInfoData
     {
         public List<Dictionary<DateTime,Exception>> ErrorList = new List<Dictionary<DateTime, Exception>>();
