@@ -309,46 +309,57 @@ namespace QBTest
                         continue;
                     case "CustomerRet":
                         more = nav.MoveToFirstChild();
-                        continue;
-                    case "FirstName":
-                        tmp.FirstName = nav.Value.Trim();
-                        more = nav.MoveToNext();
-                        continue;
-                    case "LastName":
-                        tmp.LastName= nav.Value.Trim();
-                        more = nav.MoveToNext();
-                        continue;
-                    case "Phone":
-                        tmp.Phone= nav.Value.Trim();
+                        bool l = true;
+                        while (l)
+                        {
+                            switch (nav.LocalName)
+                            {
+                                case "FirstName":
+                                    tmp.FirstName = nav.Value.Trim();
+                                    l = nav.MoveToNext();
+                                    continue;
+                                case "LastName":
+                                    tmp.LastName = nav.Value.Trim();
+                                    l = nav.MoveToNext();
+                                    continue;
+                                case "Phone":
+                                    tmp.Phone = nav.Value.Trim();                                    
+                                    l = nav.MoveToNext();
+                                    continue;
+                                case "FullName":
+                                    tmp.Name = nav.Value.Trim();
+                                    l = nav.MoveToNext();
+                                    continue;
+                                case "BillAddress":
+                                    l = nav.MoveToFirstChild();
+                                    continue;
+                                case "Addr1":
+                                    tmp.BiilAddr = nav.Value.Trim();
+                                    l = nav.MoveToParent();
+                                    l = nav.MoveToNext();
+                                    continue;
+                                default:
+                                    l = nav.MoveToNext();
+                                    continue;
+                            }                            
+                        }
                         res.Add(tmp);
                         tmp = new QBCustTmp();
                         more = nav.MoveToParent();
                         more = nav.MoveToNext();
                         continue;
-                    case "FullName":                        
-                        tmp.Name = nav.Value.Trim();
-                        more = nav.MoveToNext();
-                        continue;
-                    case "BillAddress":
-                        more = nav.MoveToFirstChild();
-                        continue;
+                   
                     case "ShipAddress":
                     case "CurrencyRef":
                         more = nav.MoveToFirstChild();
-                        continue;
-                    case "Addr1":
-                        tmp.BiilAddr= nav.Value.Trim();
-                        more = nav.MoveToParent();
-                        more = nav.MoveToNext();
-                        continue;
+                        continue;                   
                     case "Addr2":
                     case "Addr3":
                     case "Addr4":
                     case "Addr5":
                     case "City":
                     case "State":
-                    case "PostalCode":
-                        retVal[x] = retVal[x] + "\r\n" + nav.Value.Trim();
+                    case "PostalCode":                      
                         more = nav.MoveToNext();
                         continue;
                     default:
