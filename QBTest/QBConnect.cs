@@ -116,6 +116,25 @@ namespace QBTest
 
             return customerList;
         }
+        public async Task<List<QBInvoice>> loadInvoices()
+        {
+            List<QBInvoice> itemList = new List<QBInvoice>();
+            string request = "InvoiceQueryRq";
+            await connectToQB();
+            try
+            {
+                int count = await getCount(request);
+                string response = await processRequestFromQB(buildItemQueryRqXML(new string[0] , null));
+                itemList = parseInvoiceListQueryRs(response, count);
+            }
+            catch (Exception ex)
+            {
+                ErrorList.Add(DateTime.Now.AddMilliseconds(1), ex);
+            }
+            disconnectFromQB();
+
+            return itemList;
+        }
         public async Task<string[]> loadItems()
         {
             string[] itemList = new string[0];
@@ -369,7 +388,91 @@ namespace QBTest
             }
             return res;
         }
+        private List<QBInvoice> parseInvoiceListQueryRs(string xml, int count)
+        {
+            /*
+             <?xml version="1.0" ?> 
+             <QBXML>
+             <QBXMLMsgsRs>
+             <CustomerQueryRs requestID="1" statusCode="0" statusSeverity="Info" statusMessage="Status OK">
+                 <CustomerRet>
+                     <FullName>Abercrombie, Kristy</FullName> 
+                 </CustomerRet>
+             </CustomerQueryRs>
+             </QBXMLMsgsRs>
+             </QBXML>    
+            */
+            List<QBInvoice> res = new List<QBInvoice>();
+            string[] retVal = new string[count];
+            System.IO.StringReader rdr = new System.IO.StringReader(xml);
+            System.Xml.XPath.XPathDocument doc = new System.Xml.XPath.XPathDocument(rdr);
+            System.Xml.XPath.XPathNavigator nav = doc.CreateNavigator();
 
+            if (nav != null)
+            {
+                nav.MoveToFirstChild();
+            }
+            bool more = true;
+            QBInvoice tmp = new QBInvoice();
+            while (more)
+            {
+                switch (nav.LocalName)
+                {
+                    case "QBXML":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "QBXMLMsgsRs":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "CustomerQueryRs":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "CustomerRet":
+                        more = nav.MoveToFirstChild();
+                        bool l = true;
+                        while (l)
+                        {
+                            switch (nav.LocalName)
+                            {
+                                case "RefNumber":
+                                    tmp.RefNumber = nav.Value.Trim();
+                                    l = nav.MoveToNext();
+                                    continue;
+                                case "PONumber":
+                                    tmp.PONumber = nav.Value.Trim();
+                                    l = nav.MoveToNext();
+                                    continue;                               
+                                default:
+                                    l = nav.MoveToNext();
+                                    continue;
+                            }
+                        }
+                        res.Add(tmp);
+                        tmp = new QBInvoice();
+                        more = nav.MoveToParent();
+                        more = nav.MoveToNext();
+                        continue;
+
+                    case "ShipAddress":
+                    case "CurrencyRef":
+                        more = nav.MoveToFirstChild();
+                        continue;
+                    case "Addr2":
+                    case "Addr3":
+                    case "Addr4":
+                    case "Addr5":
+                    case "City":
+                    case "State":
+                    case "PostalCode":
+                        more = nav.MoveToNext();
+                        continue;
+                    default:
+                        more = nav.MoveToNext();
+                        continue;
+                }
+            }
+            return res;
+        }
         public virtual int parseRsForCount(string xml, string request)
         {
             int ret = -1;
@@ -1192,6 +1295,15 @@ namespace QBTest
         {
         }
     }
+    public abstract class QBInvoiceInfo
+    {
+        public string RefNumber;
+        public string PONumber;
+
+    }
+    public class QBInvoice : QBInvoiceInfo {
+    }
+
     public class QBCustTmp : QBCustomerInfo
     {
 
