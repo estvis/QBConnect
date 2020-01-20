@@ -99,7 +99,7 @@ namespace QBTest
         }
         public async Task<List<QBCustomerInfo>> loadCustomersList()
         {
-            List<QBCustomerInfo> customerList = new List<QBCustomerInfo>;
+            List<QBCustomerInfo> customerList = new List<QBCustomerInfo>();
             string request = "CustomerQueryRq";
             await connectToQB();
             try

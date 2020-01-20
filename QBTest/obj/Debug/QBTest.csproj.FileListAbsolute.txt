@@ -16,3 +16,8 @@ D:\EST\QBConnect\QBTest\obj\Debug\QBTest.Properties.Resources.resources
 D:\EST\QBConnect\QBTest\obj\Debug\QBTest.csproj.GenerateResource.cache
 D:\EST\QBConnect\QBTest\obj\Debug\QBTest.exe
 D:\EST\QBConnect\QBTest\obj\Debug\QBTest.pdb
+D:\EST\QBConnect\QBTest\obj\Debug\Interop.QBXMLRP2Lib.dll
+D:\EST\QBConnect\QBTest\obj\Debug\QBTest.csproj.CoreCompileInputs.cache
+D:\EST\QBConnect\QBTest\bin\Debug\QBTest.exe.config
+D:\EST\QBConnect\QBTest\bin\Debug\QBTest.exe
+D:\EST\QBConnect\QBTest\bin\Debug\QBTest.pdb

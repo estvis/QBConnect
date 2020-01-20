@@ -40,6 +40,7 @@ namespace QBTest
             showStatus("Loading customers...");
             string[] cusomers = await qb.loadCustomers();
             comboBox_Customer.Items.AddRange(cusomers);
+            await qb.loadCustomersList();
             showStatus("Loading items...");
             string[] items = await qb.loadItems();
             items = ChectList(items);
